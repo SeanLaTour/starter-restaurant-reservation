@@ -1,7 +1,5 @@
 const service = require("./reservations.service");
 
-// AsyncErrorBoundar is being funky.
-
 function validateDataExists(req, res, next) {
   res.locals.data = req.body.data;
   if (!req.body.data) {
