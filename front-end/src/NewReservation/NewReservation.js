@@ -27,7 +27,7 @@ function NewReservation() {
       status,
     };
     axios
-      .post("http://localhost:5000/reservations", { data })
+      .post("/reservations", { data })
       .then(() => {
         history.push("/dashboard");
       })
