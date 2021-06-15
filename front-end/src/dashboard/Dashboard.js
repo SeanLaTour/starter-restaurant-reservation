@@ -22,7 +22,7 @@ function Dashboard({ onLoadDate }) {
 
   useEffect(() => {
     async function loadTables() {
-      const response = await fetch("http://localhost:5000/tables");
+      const response = await fetch("/tables");
       const data = await response.json();
       setTables(data.data);
     }
@@ -119,7 +119,7 @@ function Dashboard({ onLoadDate }) {
       data: { table_id },
     };
     axios
-      .delete(`http://localhost:5000/tables/${table_id}/seat`, { data })
+      .delete(`/tables/${table_id}/seat`, { data })
       .then((res) => {
         console.log(res);
         setTableLoader(!tableLoader);
@@ -135,7 +135,7 @@ function Dashboard({ onLoadDate }) {
       status: "cancelled",
     };
     axios
-      .put(`http://localhost:5000/reservations/${reservation_id}/status`, {
+      .put(`/reservations/${reservation_id}/status`, {
         data,
       })
       .then((res) => {

@@ -15,7 +15,7 @@ function NewTable() {
       capacity,
     };
     axios
-      .post("http://localhost:5000/tables", { data })
+      .post("/tables", { data })
       .then(() => {
         history.push("/dashboard");
       })

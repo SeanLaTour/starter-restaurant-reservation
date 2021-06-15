@@ -10,7 +10,7 @@ function Search() {
     async function searchMobileNumber() {
       const mobile = document.getElementById("search").value;
       const response = await fetch(
-        `http://localhost:5000/reservations?mobile_number=${mobile}`
+        `/reservations?mobile_number=${mobile}`
       );
 
       const data = await response.json();
@@ -27,7 +27,7 @@ function Search() {
       status: "cancelled",
     };
     axios
-      .put(`http://localhost:5000/reservations/${reservation_id}/status`, {
+      .put(`/reservations/${reservation_id}/status`, {
         data,
       })
       .then(() => {

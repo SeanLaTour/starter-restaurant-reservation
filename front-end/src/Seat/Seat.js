@@ -11,7 +11,7 @@ function Seat() {
 
   useEffect(() => {
     async function loadTables() {
-      const response = await fetch("http://localhost:5000/tables");
+      const response = await fetch("/tables");
       const data = await response.json();
       setTables(data.data);
     }
@@ -36,7 +36,7 @@ function Seat() {
       reservation_id,
     };
     axios
-      .put(`http://localhost:5000/tables/${table_id}/seat`, { data })
+      .put(`/tables/${table_id}/seat`, { data })
       .then(() => {
         history.push("/dashboard");
       })

@@ -20,7 +20,7 @@ function Edit() {
   useEffect(() => {
     async function loadTables() {
       const response = await fetch(
-        `http://localhost:5000/reservations/${params.reservation_id}`
+        `/reservations/${params.reservation_id}`
       );
       const data = await response.json();
       setForm(data.data);
@@ -31,7 +31,7 @@ function Edit() {
   function handleButtonSubmit(e) {
     e.preventDefault();
     axios
-      .put(`http://localhost:5000/reservations/${params.reservation_id}`, {
+      .put(`/reservations/${params.reservation_id}`, {
         data: form,
       })
       .then(() => {
