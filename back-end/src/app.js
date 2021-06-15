@@ -11,7 +11,7 @@ const reservationsRouter = require("./reservations/reservations.router");
 const tablesRouter = require("./tables/tables.router");
 
 const app = express();
-app.use(express.static('../front-end/public'))
+app.use(express.static('../front-end/build'))
 
 app.use(cors());
 app.use(express.json());
