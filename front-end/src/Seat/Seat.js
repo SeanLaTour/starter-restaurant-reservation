@@ -8,17 +8,33 @@ function Seat() {
   const [error, setError] = useState("");
   const params = useParams();
   const history = useHistory();
+  const API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+  const abortController = new AbortController();
 
   useEffect(() => {
     async function loadTables() {
-      const response = await fetch("/tables");
-      const data = await response.json();
-      setTables(data.data);
+      try {
+        const response = await fetch(`${API_BASE_URL}/tables`, {
+          signal: abortController.signal,
+        });
+        const data = await response.json();
+        setTables(data.data);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          console.log("Aborted");
+        } else {
+          throw error;
+        }
+      }
     }
     loadTables();
-  }, []);
+    return () => {
+      console.log("cleanup");
+      abortController.abort();
+    };
+  }, [API_BASE_URL]);
 
-  // See if you can change this to a const
   let tableOptions = tables.map((table, index) => {
     return (
       <option key={index} id={table.table_id}>
@@ -36,12 +52,13 @@ function Seat() {
       reservation_id,
     };
     axios
-      .put(`/tables/${table_id}/seat`, { data })
+      .put(`${API_BASE_URL}/tables/${table_id}/seat`, { data })
       .then(() => {
         history.push("/dashboard");
       })
       .catch((err) => {
         setError(err.response.data.error);
+        abortController.abort();
       });
   }
 

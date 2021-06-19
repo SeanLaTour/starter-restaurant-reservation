@@ -17,17 +17,35 @@ function Dashboard({ onLoadDate }) {
   const today = onLoadDate;
   const [tables, setTables] = useState([]);
   const [tableLoader, setTableLoader] = useState(false);
+  const [error, setError] = useState("");
+  const API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
   useEffect(loadDashboard, [date]);
 
   useEffect(() => {
+    const abortController = new AbortController();
     async function loadTables() {
-      const response = await fetch("/tables");
-      const data = await response.json();
-      setTables(data.data);
+      try {
+        const response = await fetch(`${API_BASE_URL}/tables`, {
+          signal: abortController.signal,
+        });
+        const data = await response.json();
+        setTables(data.data);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          console.log("Aborted");
+        } else {
+          throw error;
+        }
+      }
     }
     loadTables();
-  }, [tableLoader]);
+    return () => {
+      console.log("cleanup");
+      abortController.abort();
+    };
+  }, [tableLoader, API_BASE_URL]);
 
   function loadDashboard() {
     const abortController = new AbortController();
@@ -119,12 +137,11 @@ function Dashboard({ onLoadDate }) {
       data: { table_id },
     };
     axios
-      .delete(`/tables/${table_id}/seat`, { data })
-      .then((res) => {
-        console.log(res);
+      .delete(`${API_BASE_URL}/tables/${table_id}/seat`, { data })
+      .then(() => {
         setTableLoader(!tableLoader);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => setError(err.response.data.error));
   }
 
   function handleButtonCancel(e) {
@@ -135,15 +152,14 @@ function Dashboard({ onLoadDate }) {
       status: "cancelled",
     };
     axios
-      .put(`/reservations/${reservation_id}/status`, {
+      .put(`${API_BASE_URL}/reservations/${reservation_id}/status`, {
         data,
       })
-      .then((res) => {
-        console.log(res);
+      .then(() => {
         setTableLoader(!tableLoader);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err.response.data.error)
       });
   }
 
@@ -259,6 +275,7 @@ function Dashboard({ onLoadDate }) {
           </button>
         </div>
         <ErrorAlert error={reservationsError} />
+        <ErrorAlert error={error} />
         <h2>There are no reservations for this day.</h2>
       </main>
     );

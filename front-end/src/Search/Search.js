@@ -1,23 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import ErrorAlert from "../layout/ErrorAlert";
 const axios = require("axios");
 
 function Search() {
   const [reservations, setReservations] = useState([]);
   const [tableLoader, setTableLoader] = useState(false);
+  const [error, setError] = useState("");
+  const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+  const abortController = new AbortController();
 
   useEffect(() => {
     async function searchMobileNumber() {
-      const mobile = document.getElementById("search").value;
-      const response = await fetch(
-        `/reservations?mobile_number=${mobile}`
-      );
-
-      const data = await response.json();
-      setReservations(data.data);
+      try {
+        const mobile = document.getElementById("search").value;
+        const response = await fetch(`${API_BASE_URL}/reservations?mobile_number=${mobile}`, {
+          signal: abortController.signal,
+        });
+        const data = await response.json();
+        setReservations(data.data);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          console.log("Aborted");
+        } else {
+          throw error;
+        }
+      }
     }
     searchMobileNumber();
-  }, [tableLoader]);
+    return () => {
+      console.log("cleanup");
+      abortController.abort();
+    };
+  }, [tableLoader, API_BASE_URL]);
 
   function handleButtonCancel(e) {
     e.preventDefault();
@@ -27,14 +43,15 @@ function Search() {
       status: "cancelled",
     };
     axios
-      .put(`/reservations/${reservation_id}/status`, {
+      .put(`${API_BASE_URL}/reservations/${reservation_id}/status`, {
         data,
       })
       .then(() => {
         setTableLoader(!tableLoader);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err.response.data.error);
+        abortController.abort();
       });
   }
 
@@ -119,6 +136,9 @@ function Search() {
               <Link to="/">Cancel</Link>
             </button>
           </div>
+          <div className="formItem">
+          {error && <ErrorAlert error={error} />}
+        </div>
         </form>
       </div>
     );
@@ -155,6 +175,9 @@ function Search() {
           <button name="cancel">
             <Link to="/">Cancel</Link>
           </button>
+        </div>
+        <div className="formItem">
+          {error.length > 0 && <ErrorAlert error={error} />}
         </div>
       </form>
 

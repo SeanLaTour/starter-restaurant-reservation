@@ -6,6 +6,7 @@ const axios = require("axios");
 function NewTable() {
   const [error, setError] = useState("");
   const history = useHistory();
+  const abortController = new AbortController();
 
   function handleButtonSubmit(e) {
     const table_name = document.getElementById("name").value;
@@ -21,6 +22,7 @@ function NewTable() {
       })
       .catch((err) => {
         setError(err.response.data.error);
+        abortController.abort();
       });
   }
 

@@ -1,5 +1,6 @@
 const service = require("./tables.service");
 const reservationService = require("../reservations/reservations.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 function validateDataExists(req, res, next) {
   res.locals.data = req.body.data;
@@ -159,16 +160,16 @@ module.exports = {
     validateTableName,
     validateCapacityExists,
     validateCapacityIsNotZero,
-    create,
+    asyncErrorBoundary(create),
   ],
   update: [
     validateDataExists,
     validateResId,
-    validateIdExists,
-    validateCapacity,
+    asyncErrorBoundary(validateIdExists),
+    asyncErrorBoundary(validateCapacity),
     validateIsOccupied,
-    validateResNotSeated,
-    update,
+    asyncErrorBoundary(validateResNotSeated),
+    asyncErrorBoundary(update),
   ],
-  destroy: [validateTableIdExists, validateIsNotOccupied, destroy],
+  destroy: [asyncErrorBoundary(validateTableIdExists), asyncErrorBoundary(validateIsNotOccupied), asyncErrorBoundary(destroy)],
 };

@@ -1,4 +1,5 @@
 const service = require("./reservations.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 function validateDataExists(req, res, next) {
   res.locals.data = req.body.data;
@@ -211,7 +212,7 @@ async function list(req, res) {
     const mobile = req.query.mobile_number;
     const data = await service.listByMobile(mobile);
     res.json({ data });
-  }
+  } 
 }
 
 async function create(req, res, next) {
@@ -241,7 +242,7 @@ async function updateStatus(req, res, next) {
 }
 
 module.exports = {
-  list,
+  list: [asyncErrorBoundary(list)],
   create: [
     validateDataExists,
     validateFirstNameExists,
@@ -260,17 +261,17 @@ module.exports = {
     validateIsTuesday,
     validateNotInPast,
     validateStatusIsBooked,
-    create,
+    asyncErrorBoundary(create),
   ],
-  read: [validateResIdExists, read],
+  read: [validateResIdExists, asyncErrorBoundary(read)],
   updateStatus: [
-    validateResIdExists,
-    validateNotAlreadyFinished,
+    asyncErrorBoundary(validateResIdExists),
+    asyncErrorBoundary(validateNotAlreadyFinished),
     validateStatusIsKnown,
-    updateStatus,
+    asyncErrorBoundary(updateStatus),
   ],
   update: [
-    validateResIdExists,
+    asyncErrorBoundary(validateResIdExists),
     validateDataExists,
     validateFirstNameExists,
     validateFirstName,
@@ -287,6 +288,6 @@ module.exports = {
     validateIsTuesday,
     validateNotInPast,
     validateStatusIsBooked,
-    update
+    asyncErrorBoundary(update)
   ]
 };
